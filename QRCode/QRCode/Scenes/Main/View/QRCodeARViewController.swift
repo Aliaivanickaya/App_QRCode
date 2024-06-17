@@ -164,16 +164,12 @@ final class QRCodeARViewController: UIViewController, ARSCNViewDelegate {
     }
     
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
-        // Check if this is your QR code anchor
         DispatchQueue.main.async { [weak self] in
             if let url = self?.qrCodeURLs[anchor.identifier] {
-                // Add the button node to this anchor node
                 guard let buttonNode = self?.createNode(with: "Open Link") else { return }
                 self?.sceneView?.scene.rootNode.addChildNode(buttonNode)
-                // We assume the QR code is on a vertical plane and the button should appear right below the QR code
-                buttonNode.position = SCNVector3(0, -0.1, -0.2) // Adjust the y, z offset as needed
+                buttonNode.position = SCNVector3(0, -0.1, -0.2) 
                 
-                // Associate the URL with the button node for touch handling
                 buttonNode.name = url.absoluteString
             } else if let image = self?.scannedImages[anchor.name ?? ""] {
                 guard let imageNode = self?.createImageNode(with: image) else { return }
@@ -209,7 +205,6 @@ final class QRCodeARViewController: UIViewController, ARSCNViewDelegate {
                 return
             }
             
-            // Check if the response is an image by verifying the MIME type
             if let mimeType = response?.mimeType, mimeType.hasPrefix("image") {
                 completion(UIImage(data: data))
             } else {
@@ -221,42 +216,33 @@ final class QRCodeARViewController: UIViewController, ARSCNViewDelegate {
     }
     
     private func createNode(with text: String) -> SCNNode {
-        let textGeometry = SCNText(string: text, extrusionDepth: 0.01)
-        
-        // Ensure text material is visible
+        let textGeometry = SCNText(string: text, extrusionDepth: 0.7)
+
         let material = SCNMaterial()
-        material.diffuse.contents = UIColor.red // Choose an appropriate color
+        material.diffuse.contents = UIColor.red
         textGeometry.materials = [material]
-        
+
         let textNode = SCNNode(geometry: textGeometry)
-        
-        // Set a reasonable font size
+
         textGeometry.font = UIFont.systemFont(ofSize: 0.5)
-        
-        // Adjust the scale to make sure it's visible
-        textNode.scale = SCNVector3(0.02, 0.02, 0.02) // You might need to tweak this
-        
-        // Center the pivot (optional, but helps in positioning the text correctly)
+        textNode.scale = SCNVector3(0.02, 0.02, 0.02)
+
         let (min, max) = textNode.boundingBox
-        textNode.pivot = SCNMatrix4MakeTranslation((max.x - min.x) / 2, (max.y - min.y) / 2, 0)
-        
+        textNode.pivot = SCNMatrix4MakeTranslation((max.x - min.x) / 2, (max.y - min.y) / 2, (max.z - min.z) / 2)
+
         return textNode
     }
     
     private func createImageNode(with image: UIImage) -> SCNNode {
-        // Create a plane geometry with the image as its material
         let planeGeometry = SCNPlane(width: 1.0, height: 1.0 * image.size.height / image.size.width)
         let material = SCNMaterial()
         material.diffuse.contents = image
         planeGeometry.materials = [material]
         
-        // Create a node with the plane geometry
         let imageNode = SCNNode(geometry: planeGeometry)
         
-        // Adjust the scale to make sure it's visible and appropriately sized
-        imageNode.scale = SCNVector3(0.2, 0.2, 0.2) // You might need to tweak this
+        imageNode.scale = SCNVector3(0.2, 0.2, 0.2)
         
-        // Center the pivot (optional, but helps in positioning the image correctly)
         let (min, max) = imageNode.boundingBox
         imageNode.pivot = SCNMatrix4MakeTranslation((max.x - min.x) / 2, (max.y - min.y) / 2, 0)
         imageNode.name = ""
