@@ -219,9 +219,16 @@ final class QRCodeARViewController: UIViewController, ARSCNViewDelegate {
         let textGeometry = SCNText(string: text, extrusionDepth: 0.7)
 
         let material = SCNMaterial()
-        material.diffuse.contents = UIColor.red
-        textGeometry.materials = [material]
+            material.lightingModel = .blinn
+            material.diffuse.contents = UIColor.yellow
+            material.metalness.contents = UIColor.white
+            material.metalness.intensity = 1.0
+            textGeometry.materials = [material]
 
+        sceneView?.scene = SCNScene()
+        sceneView?.autoenablesDefaultLighting   = true
+        sceneView?.automaticallyUpdatesLighting = true
+        
         let textNode = SCNNode(geometry: textGeometry)
 
         textGeometry.font = UIFont.systemFont(ofSize: 0.5)
